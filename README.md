@@ -1,0 +1,2 @@
+# XTabLayout
+AndroidX的TabLayout的基础上增加了修改选中项字体大小、修改指示器长度
