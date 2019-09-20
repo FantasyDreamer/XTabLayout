@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.R.attr.id;
 import static android.R.attr.maxWidth;
 import static androidx.appcompat.widget.AppCompatDrawableManager.get;
 import static androidx.viewpager.widget.ViewPager.SCROLL_STATE_DRAGGING;
@@ -211,6 +212,7 @@ public class XTabLayout extends HorizontalScrollView {
     private int dividerHeight;
     private int dividerColor;
     private int dividerGravity;
+    private boolean xTabRedDot;
 
     private XTabLayout.OnTabSelectedListener mOnTabSelectedListener;
     private List<OnTabSelectedListener> mOnTabSelectedListenerList = new ArrayList<>();
@@ -222,6 +224,7 @@ public class XTabLayout extends HorizontalScrollView {
     private DataSetObserver mPagerAdapterObserver;
     private XTabLayout.TabLayoutOnPageChangeListener mPageChangeListener;
 
+    List<Integer> redDotList = new ArrayList<>();
     // Pool we use as a simple RecyclerBin
     private final Pools.Pool<TabView> mTabViewPool = new Pools.SimplePool<>(12);
 
@@ -245,7 +248,6 @@ public class XTabLayout extends HorizontalScrollView {
         mTabStrip = new XTabLayout.SlidingTabStrip(context);
         super.addView(mTabStrip, 0, new LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
-
    /*     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TabLayout,
                 defStyleAttr, R.style.Widget_Design_TabLayout);*/
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.XTabLayout,
@@ -277,6 +279,7 @@ public class XTabLayout extends HorizontalScrollView {
         xTabTextBold = a.getBoolean(R.styleable.XTabLayout_xTabTextBold,false);
         mTabSelectedTextSize = a.getDimensionPixelSize(R.styleable.XTabLayout_xTabSelectedTextSize, 0);
         xTabTextSelectedBold = a.getBoolean(R.styleable.XTabLayout_xTabTextSelectedBold,false);
+        xTabRedDot = a.getBoolean(R.styleable.XTabLayout_xTabRedDot,false);
 
         // Text colors/sizes come from the text appearance first
         final TypedArray ta = context.obtainStyledAttributes(mTabTextAppearance,
@@ -795,6 +798,9 @@ public class XTabLayout extends HorizontalScrollView {
         return getTabScrollRange() > 0;
     }
 
+    public void setRedDotNum(List<Integer> redDotList){
+        this.redDotList = redDotList;
+    }
     private int getTabScrollRange() {
         return Math.max(0, mTabStrip.getWidth() - getWidth() - getPaddingLeft()
                 - getPaddingRight());
@@ -826,8 +832,27 @@ public class XTabLayout extends HorizontalScrollView {
         if (mPagerAdapter != null) {
             final int adapterCount = mPagerAdapter.getCount();
 
-            for (int i = 0; i < adapterCount; i++) {
-                addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
+            if (xTabRedDot){
+                for (int i = 0; i < adapterCount; i++) {
+                    XTabLayout.Tab tab = newTab();
+                    tab.setCustomView(R.layout.view_red_dot);
+                    TextView tabTitle = tab.getCustomView().findViewById(R.id.tvTabTitle);
+                    TextView ivTabRed = tab.getCustomView().findViewById(R.id.ivTabRed);
+                    tabTitle.setText(mPagerAdapter.getPageTitle(i));
+                    if (redDotList.get(i) == null || redDotList.get(i) ==0){
+                        ivTabRed.setText("");
+                        ivTabRed.setBackground(null);
+                    }else{
+                        ivTabRed.setText(redDotList.get(i)+"");
+                        ivTabRed.setBackground(this.getResources().getDrawable(R.drawable.red_dot));
+                    }
+                    addTab(tab, false);
+//                    addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
+                }
+            }else{
+                for (int i = 0; i < adapterCount; i++) {
+                    addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
+                }
             }
 
             // Make sure we reflect the currently set ViewPager item
