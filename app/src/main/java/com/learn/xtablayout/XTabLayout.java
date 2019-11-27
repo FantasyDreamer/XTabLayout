@@ -211,6 +211,7 @@ public class XTabLayout extends HorizontalScrollView {
     private int dividerHeight;
     private int dividerColor;
     private int dividerGravity;
+    private boolean xTabRedDot;
 
     private XTabLayout.OnTabSelectedListener mOnTabSelectedListener;
     private List<OnTabSelectedListener> mOnTabSelectedListenerList = new ArrayList<>();
@@ -277,6 +278,7 @@ public class XTabLayout extends HorizontalScrollView {
         xTabTextBold = a.getBoolean(R.styleable.XTabLayout_xTabTextBold,false);
         mTabSelectedTextSize = a.getDimensionPixelSize(R.styleable.XTabLayout_xTabSelectedTextSize, 0);
         xTabTextSelectedBold = a.getBoolean(R.styleable.XTabLayout_xTabTextSelectedBold,false);
+        xTabRedDot = a.getBoolean(R.styleable.XTabLayout_xTabRedDot,false);
 
         // Text colors/sizes come from the text appearance first
         final TypedArray ta = context.obtainStyledAttributes(mTabTextAppearance,
@@ -826,8 +828,19 @@ public class XTabLayout extends HorizontalScrollView {
         if (mPagerAdapter != null) {
             final int adapterCount = mPagerAdapter.getCount();
 
-            for (int i = 0; i < adapterCount; i++) {
-                addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
+            if (xTabRedDot){
+                for (int i = 0; i < adapterCount; i++) {
+                    XTabLayout.Tab tab = newTab();
+                    tab.setCustomView(R.layout.view_red_dot);
+                    TextView tv_tab_title = tab.getCustomView().findViewById(R.id.tv_tab_title);
+                    tv_tab_title.setText(mPagerAdapter.getPageTitle(i));
+                    addTab(tab, false);
+//                    addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
+                }
+            }else{
+                for (int i = 0; i < adapterCount; i++) {
+                    addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
+                }
             }
 
             // Make sure we reflect the currently set ViewPager item
