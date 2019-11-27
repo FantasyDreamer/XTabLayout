@@ -58,6 +58,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static android.R.attr.id;
 import static android.R.attr.maxWidth;
 import static androidx.appcompat.widget.AppCompatDrawableManager.get;
 import static androidx.viewpager.widget.ViewPager.SCROLL_STATE_DRAGGING;
@@ -223,6 +224,7 @@ public class XTabLayout extends HorizontalScrollView {
     private DataSetObserver mPagerAdapterObserver;
     private XTabLayout.TabLayoutOnPageChangeListener mPageChangeListener;
 
+    List<Integer> redDotList = new ArrayList<>();
     // Pool we use as a simple RecyclerBin
     private final Pools.Pool<TabView> mTabViewPool = new Pools.SimplePool<>(12);
 
@@ -246,7 +248,6 @@ public class XTabLayout extends HorizontalScrollView {
         mTabStrip = new XTabLayout.SlidingTabStrip(context);
         super.addView(mTabStrip, 0, new LayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT));
-
    /*     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.TabLayout,
                 defStyleAttr, R.style.Widget_Design_TabLayout);*/
         TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.XTabLayout,
@@ -797,6 +798,9 @@ public class XTabLayout extends HorizontalScrollView {
         return getTabScrollRange() > 0;
     }
 
+    public void setRedDotNum(List<Integer> redDotList){
+        this.redDotList = redDotList;
+    }
     private int getTabScrollRange() {
         return Math.max(0, mTabStrip.getWidth() - getWidth() - getPaddingLeft()
                 - getPaddingRight());
@@ -832,8 +836,16 @@ public class XTabLayout extends HorizontalScrollView {
                 for (int i = 0; i < adapterCount; i++) {
                     XTabLayout.Tab tab = newTab();
                     tab.setCustomView(R.layout.view_red_dot);
-                    TextView tv_tab_title = tab.getCustomView().findViewById(R.id.tv_tab_title);
-                    tv_tab_title.setText(mPagerAdapter.getPageTitle(i));
+                    TextView tabTitle = tab.getCustomView().findViewById(R.id.tvTabTitle);
+                    TextView ivTabRed = tab.getCustomView().findViewById(R.id.ivTabRed);
+                    tabTitle.setText(mPagerAdapter.getPageTitle(i));
+                    if (redDotList.get(i) == null || redDotList.get(i) ==0){
+                        ivTabRed.setText("");
+                        ivTabRed.setBackground(null);
+                    }else{
+                        ivTabRed.setText(redDotList.get(i)+"");
+                        ivTabRed.setBackground(this.getResources().getDrawable(R.drawable.red_dot));
+                    }
                     addTab(tab, false);
 //                    addTab(newTab().setText(mPagerAdapter.getPageTitle(i)), false);
                 }
